@@ -10,6 +10,7 @@ from src.NAS import NASGatedConv
 
 class ResNet18(pl.LightningModule):
     def __init__(self, fully_conv=False, pretrained=True, remove_avg_pool_layer=False, 
+    feature_extracting=False,
     use_gates_with_penalty=0, lr=1e-3, optim='adam', scheduler_t_max=100):
         super().__init__()
         self.lambda_gates_penalty = use_gates_with_penalty
@@ -20,9 +21,14 @@ class ResNet18(pl.LightningModule):
         self.model = resnet18(fully_conv=fully_conv,
                                pretrained=pretrained,
                                remove_avg_pool_layer=remove_avg_pool_layer)
+        if feature_extracting:
+            for param in self.model.parameters():
+                param.requires_grad = False
+
         num_ftrs =  self.model.fc.in_features
         self.model.fc = nn.Linear(512, num_classes)
 
+        
         self.criterion =  nn.CrossEntropyLoss()
         self.scheduler_t_max = 100
         self.lr = lr
