@@ -41,8 +41,6 @@ class ResNet18(pl.LightningModule):
         # It is independent of forward
         x, y = batch
         x_hat = self(x)
-        print(x_hat.shape, y.shape)
-
         loss = self.criterion(x_hat, y)
 
         # Optional Gate Penalty
