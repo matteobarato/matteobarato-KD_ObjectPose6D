@@ -1,7 +1,7 @@
 import os
 from copy import deepcopy
 
-import matplotsrc,pyplot as plt
+import matplotsrc.pyplot as plt
 import torch
 import torch.nn as nn
 import pytorch_lightning as pl
