@@ -9,17 +9,20 @@ from src.models.resnet import resnet18
 from src.NAS import NASGatedConv
 
 class ResNet18(pl.LightningModule):
-    def __init__(self, fully_conv=True, pretrained=True, output_stride=8, remove_avg_pool_layer=False, 
+    def __init__(self, fully_conv=False, pretrained=True, remove_avg_pool_layer=False, 
     use_gates_with_penalty=0, lr=1e-3, optim='adam', scheduler_t_max=100):
         super().__init__()
         self.lambda_gates_penalty = use_gates_with_penalty
         if self.lambda_gates_penalty:
             self.NAS = NASGatedConv(verbose=False)
 
+        num_classes = 10
         self.model = resnet18(fully_conv=fully_conv,
                                pretrained=pretrained,
-                               output_stride=output_stride,
                                remove_avg_pool_layer=remove_avg_pool_layer)
+        num_ftrs =  self.model.fc.in_features
+        self.model.fc = nn.Linear(512, num_classes)
+
         self.criterion =  nn.CrossEntropyLoss()
         self.scheduler_t_max = 100
         self.lr = lr
@@ -30,7 +33,7 @@ class ResNet18(pl.LightningModule):
 
     def forward(self, x):
         # in lightning, forward defines the prediction/inference actions
-        out = self.model(x)
+        out = self.model(x)[-1]
         return out
 
     def training_step(self, batch, batch_idx):
@@ -38,6 +41,7 @@ class ResNet18(pl.LightningModule):
         # It is independent of forward
         x, y = batch
         x_hat = self(x)
+        print(x_hat.shape, y.shape)
 
         loss = self.criterion(x_hat, y)
 
@@ -74,16 +78,16 @@ class ResNet18(pl.LightningModule):
         return {"loss": loss, "preds": x_hat}
 
 
-    def configure_optimizers(self):
+    def configure_optimizers(self):      
         if (self.optim=='sgd'):
-             optimizer = optim.SGD(self.parameters(), lr=self.lr,
+            optimizer = optim.SGD(self.parameters(), lr=self.lr,
                       momentum=0.9, weight_decay=5e-4)
         else:
             optimizer = optim.Adam(self.parameters(), weight_decay=5e-4, lr=self.lr)
 
-        scheduler_1 = optim.lr_scheduler.LinearLR(optimizer, start_factor=(1/self.scheduler_t_max), end_factor=1.0, total_iters=10)
-        scheduler_2 = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.scheduler_t_max, eta_min=self.lr_min)
-        scheduler = optim.lr_scheduler.SequentialLR(optimizer, [scheduler_1, scheduler_2], [10])
+        # scheduler_1 = optim.lr_scheduler.LinearLR(optimizer, start_factor=(1/self.scheduler_t_max), end_factor=1.0, total_iters=10)
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.scheduler_t_max, eta_min=self.lr_min)
+        # scheduler = optim.lr_scheduler.SequentialLR(optimizer, [scheduler_1, scheduler_2], [10])
         return [optimizer], [scheduler]
 
     def apply_gates(self):
