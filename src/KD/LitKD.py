@@ -110,10 +110,10 @@ class GatedKD(BaseClass):
         super(GatedKD, self).__init__(
             teacher_model,
             student_model,
-            loss_fn=loss_fn,
-            temp=temp,
-            distill_weight=distill_weight,
-            verbose=verbose
+            loss_fn,
+            temp,
+            distill_weight,
+            verbose
             )
         
     def calculate_kd_loss(self, y_pred_student, y_pred_teacher, loss_student, y_true):
