@@ -5,8 +5,8 @@ from torch import nn, optim
 import torch.nn.functional as F
 import pytorch_lightning as pl
 from torchmetrics import Accuracy
-from lib.models.resnet import resnet18
-from lib.NAS import NASGatedConv
+from src,models.resnet import resnet18
+from src,NAS import NASGatedConv
 
 class ResNet18(pl.LightningModule):
     def __init__(self, fully_conv=True, pretrained=True, output_stride=8, remove_avg_pool_layer=False, 
