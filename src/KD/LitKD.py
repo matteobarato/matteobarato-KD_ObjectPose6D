@@ -23,6 +23,7 @@ class BaseClass (pl.LightningModule):
         self.distill_weight = distill_weight
         self.val_accuracy = Accuracy()
         self.test_accuracy = Accuracy()
+        self.save_hyperparameters()
 
     def forward(self, x):
         return self.student_model(x)

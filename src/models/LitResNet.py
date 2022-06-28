@@ -36,6 +36,8 @@ class ResNet18(pl.LightningModule):
         self.optim = optim
         self.val_accuracy = Accuracy()
         self.test_accuracy = Accuracy()
+        self.save_hyperparameters()
+
 
     def forward(self, x):
         # in lightning, forward defines the prediction/inference actions
@@ -52,6 +54,7 @@ class ResNet18(pl.LightningModule):
         # Optional Gate Penalty
         if (self.lambda_gates_penalty):
             gates_penalty = torch.sum(torch.Tensor([torch.norm(g[0].weight,1) for g in self.NAS.gate_layers]))
+            self.log('gates_loss', gates_penalty)
             loss += self.lamba_gates_penalty * gates_penalty
         # Logging to TensorBoard by default
         self.log("train_loss", loss)
