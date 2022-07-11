@@ -1,3 +1,6 @@
 [submodule "PVNet/PVNet/pvnet"]
 	path = PVNet/PVNet/pvnet
 	url = https://github.com/zju3dv/pvnet.git
+[submodule "PVNet/pvnet"]
+	path = PVNet/pvnet
+	url = https://github.com/zju3dv/pvnet.git
